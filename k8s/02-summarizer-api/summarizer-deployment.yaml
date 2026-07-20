@@ -13,6 +13,8 @@ spec:
       labels:
         app: summarizer-api
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
         - name: summarizer-api
           image: ghcr.io/simranjeet19/kubeintel-summarizer-api:latest
