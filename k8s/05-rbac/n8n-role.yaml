@@ -1,0 +1,19 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: n8n-role
+  namespace: kubeintel
+rules:
+  # read own configmap and secret
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["n8n-config"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["n8n-secret"]
+    verbs: ["get"]
+  # health check awareness — read own pod status only
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
