@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: summarizer-config
+  namespace: kubeintel
+data:
+  LOG_LEVEL: INFO
+  PORT: "8000"
+  MODEL: claude-opus-4-8
+  MAX_TOKENS: "512"
