@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: kubeintel
+data:
+  POSTGRES_DB: kubeintel
+  POSTGRES_USER: kubeintel_user
