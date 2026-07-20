@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: n8n-config
+  namespace: kubeintel
+data:
+  N8N_PORT: "5678"
+  N8N_PROTOCOL: "http"
+  N8N_HOST: "0.0.0.0"
+  N8N_LOG_LEVEL: "info"
+  N8N_LOG_OUTPUT: "console"
+  # store workflow data in postgres instead of sqlite
+  DB_TYPE: "postgresdb"
+  DB_POSTGRESDB_HOST: "postgres-headless.kubeintel.svc.cluster.local"
+  DB_POSTGRESDB_PORT: "5432"
+  DB_POSTGRESDB_DATABASE: "kubeintel"
+  DB_POSTGRESDB_USER: "kubeintel_user"
+  # disable diagnostics and telemetry
+  N8N_DIAGNOSTICS_ENABLED: "false"
+  N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
+  EXECUTIONS_DATA_PRUNE: "true"
+  EXECUTIONS_DATA_MAX_AGE: "336"
