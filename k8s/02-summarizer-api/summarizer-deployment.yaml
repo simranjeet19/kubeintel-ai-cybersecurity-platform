@@ -18,7 +18,7 @@ spec:
       containers:
         - name: summarizer-api
           image: ghcr.io/simranjeet19/kubeintel-summarizer-api:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8000
           envFrom:
