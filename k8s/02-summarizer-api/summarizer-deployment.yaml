@@ -13,12 +13,23 @@ spec:
       labels:
         app: summarizer-api
     spec:
+      serviceAccountName: summarizer-api-sa
+      automountServiceAccountToken: false
       imagePullSecrets:
         - name: ghcr-secret
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
       containers:
         - name: summarizer-api
           image: ghcr.io/simranjeet19/kubeintel-summarizer-api:latest
           imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
           ports:
             - containerPort: 8000
           envFrom:
