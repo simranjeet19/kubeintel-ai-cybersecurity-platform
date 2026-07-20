@@ -25,12 +25,12 @@ spec:
       initContainers:
         # wait for postgres to be ready before starting n8n
         - name: wait-for-postgres
-          image: busybox:1.36-musl
+          image: postgres:16-alpine
           command:
             - sh
             - -c
             - |
-              until nc -z postgres-headless.kubeintel.svc.cluster.local 5432; do
+              until pg_isready -h postgres-headless.kubeintel.svc.cluster.local -p 5432 -U kubeintel_user; do
                 echo "waiting for postgres..."
                 sleep 3
               done
