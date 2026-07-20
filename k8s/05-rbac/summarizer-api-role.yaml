@@ -1,0 +1,15 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: summarizer-api-role
+  namespace: kubeintel
+rules:
+  # read own configmap and secret — nothing else
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["summarizer-config"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["summarizer-secret"]
+    verbs: ["get"]
