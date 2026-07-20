@@ -1,0 +1,40 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Secrets — never commit these
+.env
+*.env
+*.key
+*.pem
+*.crt
+*.csr
+kubeconfig
+admin.conf
+*.token
+*-secret-values.yaml
+
+# Helm
+charts/
+*.tgz
+
+# Generated / temp
+*.log
+tmp/
+.cache/
+dist/
+
+# n8n local data
+.n8n/
+
+# Terraform (if added later)
+.terraform/
+*.tfstate
+*.tfstate.backup
