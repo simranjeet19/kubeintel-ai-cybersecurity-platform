@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: kubeintel
+
+resources:
+  - default-deny-all.yaml
+  - allow-dns-egress.yaml
+  - allow-n8n-egress-internal.yaml
+  - allow-n8n-to-postgres.yaml
+  - allow-n8n-to-summarizer.yaml
+  - allow-ingress-to-n8n.yaml
+  - allow-summarizer-egress-internet.yaml
+  - allow-summarizer-to-postgres.yaml
+  - allow-digest-exporter-egress.yaml
+  - allow-digest-exporter-to-postgres.yaml
