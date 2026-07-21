@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: kubeintel-limitrange
+  namespace: kubeintel
+spec:
+  limits:
+    # default requests/limits for any container that doesn't specify them
+    - type: Container
+      default:
+        cpu: 200m
+        memory: 256Mi
+      defaultRequest:
+        cpu: 50m
+        memory: 64Mi
+      max:
+        cpu: "1"
+        memory: 1Gi
+      min:
+        cpu: 10m
+        memory: 32Mi
+    # cap individual PVC sizes
+    - type: PersistentVolumeClaim
+      max:
+        storage: 10Gi
+      min:
+        storage: 1Gi

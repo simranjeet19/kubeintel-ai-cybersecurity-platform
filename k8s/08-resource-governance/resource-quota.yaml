@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: kubeintel-quota
+  namespace: kubeintel
+spec:
+  hard:
+    # compute
+    requests.cpu: "2"
+    requests.memory: 2Gi
+    limits.cpu: "4"
+    limits.memory: 4Gi
+    # storage
+    requests.storage: 20Gi
+    persistentvolumeclaims: "5"
+    # object counts — prevents runaway pod/secret creation
+    pods: "20"
+    services: "10"
+    secrets: "20"
+    configmaps: "20"
