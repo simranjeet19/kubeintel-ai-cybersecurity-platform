@@ -1,10 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SummarizeRequest(BaseModel):
-    title: str
-    content: str
-    category: str = "general"
+    title: str = Field(max_length=500)
+    content: str = Field(max_length=50_000)
+    category: str = Field(default="general", max_length=100)
 
 
 class SummarizeResponse(BaseModel):

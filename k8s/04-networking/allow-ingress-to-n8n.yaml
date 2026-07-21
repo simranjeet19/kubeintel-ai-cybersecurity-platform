@@ -10,6 +10,9 @@ spec:
   policyTypes:
     - Ingress
   ingress:
-    - ports:
+    - from:
+        - ipBlock:
+            cidr: 192.168.64.0/24
+      ports:
         - protocol: TCP
           port: 5678
