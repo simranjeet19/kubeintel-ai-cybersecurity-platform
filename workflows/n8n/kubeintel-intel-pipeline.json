@@ -1,0 +1,180 @@
+{
+  "name": "kubeintel-intel-pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": [1],
+              "triggerAtHour": 8,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "node-schedule",
+      "name": "Weekly Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=5&startIndex=0&noRejected",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "node-nvd",
+      "name": "Fetch NVD CVEs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "node-cisa",
+      "name": "Fetch CISA KEV",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 420]
+    },
+    {
+      "parameters": {
+        "jsCode": "const nvdData = $('Fetch NVD CVEs').first().json;\nconst cisaData = $('Fetch CISA KEV').first().json;\n\nconst items = [];\n\n// Process top 3 NVD CVEs\nconst cves = (nvdData.vulnerabilities || []).slice(0, 3);\nfor (const entry of cves) {\n  const cve = entry.cve;\n  const desc = (cve.descriptions || []).find(d => d.lang === 'en');\n  if (!desc) continue;\n  const cvssScore = cve.metrics?.cvssMetricV31?.[0]?.cvssData?.baseScore\n    || cve.metrics?.cvssMetricV30?.[0]?.cvssData?.baseScore\n    || 0;\n  items.push({\n    title: cve.id,\n    content: desc.value,\n    category: 'vulnerability',\n    source_url: `https://nvd.nist.gov/vuln/detail/${cve.id}`,\n    cvss: cvssScore\n  });\n}\n\n// Process top 2 CISA KEVs (most recent)\nconst kevs = (cisaData.vulnerabilities || []).slice(-2).reverse();\nfor (const kev of kevs) {\n  items.push({\n    title: `${kev.cveID}: ${kev.vulnerabilityName}`,\n    content: `${kev.shortDescription} Affected product: ${kev.product} by ${kev.vendorProject}. Required action: ${kev.requiredAction}`,\n    category: 'exploited-in-wild',\n    source_url: `https://nvd.nist.gov/vuln/detail/${kev.cveID}`,\n    cvss: 0\n  });\n}\n\nreturn items.map(item => ({ json: item }));"
+      },
+      "id": "node-merge",
+      "name": "Merge and Prepare Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://summarizer-svc:8000/summarize",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"title\": $json.title, \"content\": $json.content, \"category\": $json.category } }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "node-summarizer",
+      "name": "Summarize via Claude",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const summarized = $input.all();\n\nconst items = summarized.map(item => ({\n  title: item.json.title,\n  summary: item.json.summary,\n  risk_level: item.json.risk_level,\n  category: item.json.category,\n  source_url: item.json.source_url || '',\n  updated_at: new Date().toISOString()\n}));\n\nconst digest = {\n  updated_at: new Date().toISOString(),\n  items: items\n};\n\nconst content = btoa(unescape(encodeURIComponent(JSON.stringify(digest, null, 2))));\n\nreturn [{ json: { digest, content } }];"
+      },
+      "id": "node-build-digest",
+      "name": "Build Digest JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/simranjeet19/kubeintel-digests/contents/digest.json",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "node-get-sha",
+      "name": "Get Current File SHA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.github.com/repos/simranjeet19/kubeintel-digests/contents/digest.json",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'token ' + $vars.GITHUB_TOKEN }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"message\": \"chore: update intel digest \" + new Date().toISOString().split('T')[0], \"content\": $('Build Digest JSON').first().json.content, \"sha\": $json.sha } }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "node-push-github",
+      "name": "Push to GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ 'INSERT INTO research_digests (title, source_url, category, summary, risk_level) VALUES ' + $('Build Digest JSON').first().json.digest.items.map(i => `('${i.title.replace(/'/g, \"''\")}', '${i.source_url}', '${i.category}', '${i.summary.replace(/'/g, \"''\")}', '${i.risk_level}')`).join(', ') }}",
+        "options": {}
+      },
+      "id": "node-postgres",
+      "name": "Store in PostgreSQL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [1560, 480]
+    }
+  ],
+  "connections": {
+    "Weekly Schedule": {
+      "main": [[{"node": "Fetch NVD CVEs", "type": "main", "index": 0}, {"node": "Fetch CISA KEV", "type": "main", "index": 0}]]
+    },
+    "Fetch NVD CVEs": {
+      "main": [[{"node": "Merge and Prepare Items", "type": "main", "index": 0}]]
+    },
+    "Fetch CISA KEV": {
+      "main": [[{"node": "Merge and Prepare Items", "type": "main", "index": 1}]]
+    },
+    "Merge and Prepare Items": {
+      "main": [[{"node": "Summarize via Claude", "type": "main", "index": 0}]]
+    },
+    "Summarize via Claude": {
+      "main": [[{"node": "Build Digest JSON", "type": "main", "index": 0}]]
+    },
+    "Build Digest JSON": {
+      "main": [[{"node": "Get Current File SHA", "type": "main", "index": 0}]]
+    },
+    "Get Current File SHA": {
+      "main": [[{"node": "Push to GitHub", "type": "main", "index": 0}, {"node": "Store in PostgreSQL", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "errorWorkflow": ""
+  }
+}
