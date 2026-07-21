@@ -26,3 +26,7 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
+    # reach external APIs (NVD, CISA, etc.)
+    - ports:
+        - protocol: TCP
+          port: 443
