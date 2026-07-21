@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: digest-exporter-config
+  namespace: kubeintel
+data:
+  GITHUB_REPO: simranjeet19/kubeintel-digests
+  GITHUB_PATH: digest.json
+  DIGEST_LIMIT: "10"
+  LOG_LEVEL: INFO

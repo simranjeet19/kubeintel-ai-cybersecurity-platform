@@ -1,0 +1,59 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: digest-exporter
+  namespace: kubeintel
+spec:
+  # runs every Monday at 09:00 UTC — after n8n has had time to summarize
+  schedule: "0 9 * * 1"
+  timeZone: "UTC"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: digest-exporter
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: digest-exporter-sa
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            fsGroup: 1000
+          containers:
+            - name: digest-exporter
+              image: ghcr.io/simranjeet19/kubeintel-digest-exporter:latest
+              imagePullPolicy: Always
+              envFrom:
+                - configMapRef:
+                    name: digest-exporter-config
+              env:
+                - name: GITHUB_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: digest-exporter-secret
+                      key: GITHUB_TOKEN
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: digest-exporter-secret
+                      key: DATABASE_URL
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 128Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+          imagePullSecrets:
+            - name: ghcr-secret
