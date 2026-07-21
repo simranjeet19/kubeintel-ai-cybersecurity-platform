@@ -83,7 +83,7 @@ spec:
   ports:
     - port: 443
       protocol: TCP
-      targetPort: https
+      targetPort: 10251
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -113,28 +113,26 @@ spec:
           imagePullPolicy: IfNotPresent
           args:
             - --cert-dir=/tmp
-            - --secure-port=10250
-            - --kubelet-preferred-address-types=InternalIP
-            - --kubelet-use-node-status-port
+            - --secure-port=10251
+            - --kubelet-preferred-address-types=InternalIP,Hostname,ExternalIP
             - --metric-resolution=15s
-            # required on kubeadm clusters — kubelet uses self-signed certs
             - --kubelet-insecure-tls
           ports:
-            - containerPort: 10250
+            - containerPort: 10251
               name: https
               protocol: TCP
           livenessProbe:
             failureThreshold: 3
             httpGet:
               path: /livez
-              port: https
+              port: 10251
               scheme: HTTPS
             periodSeconds: 10
           readinessProbe:
             failureThreshold: 3
             httpGet:
               path: /readyz
-              port: https
+              port: 10251
               scheme: HTTPS
             initialDelaySeconds: 20
             periodSeconds: 10
