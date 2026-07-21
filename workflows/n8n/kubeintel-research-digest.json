@@ -1,0 +1,89 @@
+{
+  "name": "kubeintel-research-digest",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://summarizer-svc:8000/summarize",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "CVE-2024-12345: Critical OpenSSL RCE"
+            },
+            {
+              "name": "content",
+              "value": "A critical buffer overflow vulnerability in OpenSSL 3.x allows remote code execution via a malformed TLS certificate chain. CVSS score 9.8. All versions prior to 3.2.1 are affected. Immediate patching recommended."
+            },
+            {
+              "name": "category",
+              "value": "vulnerability"
+            }
+          ]
+        }
+      },
+      "id": "2",
+      "name": "Call Summarizer API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO research_digests (title, source_url, category, summary, risk_level) VALUES ('{{ $json.title }}', '', '{{ $json.category }}', '{{ $json.summary }}', '{{ $json.risk_level }}')",
+        "options": {}
+      },
+      "id": "3",
+      "name": "Store in PostgreSQL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Call Summarizer API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Summarizer API": {
+      "main": [
+        [
+          {
+            "node": "Store in PostgreSQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
