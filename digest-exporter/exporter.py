@@ -79,7 +79,7 @@ def get_file_sha(repo: str, path: str, token: str) -> str | None:
 
 def push_digest(repo: str, path: str, token: str, content: dict, sha: str | None):
     digest = {
-        "updated_at": datetime.datetime.utcnow().isoformat() + "Z",
+        "updated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "items": content,
     }
     encoded = base64.b64encode(
