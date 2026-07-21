@@ -11,4 +11,5 @@ resources:
   - 04-networking
   - 05-rbac
   - 06-digest-exporter
+  - 06-observability
   - 08-resource-governance
