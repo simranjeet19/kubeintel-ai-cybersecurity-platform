@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: kubeintel
+
+resources:
+  - summarizer-api-serviceaccount.yaml
+  - summarizer-api-role.yaml
+  - summarizer-api-rolebinding.yaml
+  - n8n-serviceaccount.yaml
+  - n8n-role.yaml
+  - n8n-rolebinding.yaml

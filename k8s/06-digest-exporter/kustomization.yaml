@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: kubeintel
+
+resources:
+  - digest-exporter-serviceaccount.yaml
+  - digest-exporter-configmap.yaml
+  - digest-exporter-secret.yaml
+  - digest-exporter-cronjob.yaml

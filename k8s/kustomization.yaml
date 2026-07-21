@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: kubeintel
+
+resources:
+  - 00-namespace
+  - 01-postgres
+  - 02-summarizer-api
+  - 03-n8n
+  - 04-networking
+  - 05-rbac
+  - 06-digest-exporter
