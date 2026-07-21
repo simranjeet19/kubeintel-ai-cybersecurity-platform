@@ -57,7 +57,7 @@ spec:
               drop: ["ALL"]
           volumeMounts:
             - name: provisioning
-              mountPath: /etc/grafana/provisioning
+              mountPath: /etc/grafana/provisioning/datasources
             - name: data
               mountPath: /var/lib/grafana
       volumes:
