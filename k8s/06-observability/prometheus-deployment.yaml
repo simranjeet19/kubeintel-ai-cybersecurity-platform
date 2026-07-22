@@ -14,11 +14,13 @@ spec:
         app: prometheus
     spec:
       serviceAccountName: prometheus-sa
-      automountServiceAccountToken: true
+      automountServiceAccountToken: true  # required for kubernetes_sd_configs pod discovery
       securityContext:
         runAsNonRoot: true
         runAsUser: 65534
         fsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: prometheus
           image: prom/prometheus:v2.54.1
@@ -71,6 +73,8 @@ kind: Service
 metadata:
   name: prometheus-svc
   namespace: kubeintel
+  labels:
+    app: prometheus
 spec:
   type: ClusterIP
   selector:

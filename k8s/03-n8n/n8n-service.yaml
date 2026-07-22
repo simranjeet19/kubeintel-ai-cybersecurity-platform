@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: n8n-svc
   namespace: kubeintel
+  labels:
+    app: n8n
 spec:
   type: ClusterIP
   selector:

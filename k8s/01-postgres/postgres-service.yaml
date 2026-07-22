@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: postgres-headless
   namespace: kubeintel
+  labels:
+    app: postgres
 spec:
   clusterIP: None
   selector:

@@ -4,8 +4,7 @@ metadata:
   name: digest-exporter
   namespace: kubeintel
 spec:
-  # runs every Monday at 09:00 UTC — after n8n has had time to summarize
-  schedule: "0 9 * * 1"
+  schedule: "0 9 * * 1"  # Monday 09:00 UTC
   timeZone: "UTC"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
@@ -21,14 +20,18 @@ spec:
           restartPolicy: OnFailure
           serviceAccountName: digest-exporter-sa
           automountServiceAccountToken: false
+          imagePullSecrets:
+            - name: ghcr-secret
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
             fsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
           containers:
             - name: digest-exporter
-              image: ghcr.io/simranjeet19/kubeintel-digest-exporter:latest
-              imagePullPolicy: Always
+              image: ghcr.io/simranjeet19/kubeintel-digest-exporter:1.0.0
+              imagePullPolicy: IfNotPresent
               envFrom:
                 - configMapRef:
                     name: digest-exporter-config
@@ -55,5 +58,3 @@ spec:
                 readOnlyRootFilesystem: true
                 capabilities:
                   drop: ["ALL"]
-          imagePullSecrets:
-            - name: ghcr-secret

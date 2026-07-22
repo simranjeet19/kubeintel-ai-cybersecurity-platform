@@ -9,3 +9,4 @@ resources:
   - summarizer-deployment.yaml
   - summarizer-service.yaml
   - summarizer-hpa.yaml
+  - summarizer-pdb.yaml

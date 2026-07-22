@@ -146,33 +146,51 @@ kubectl get cronjobs -n kubeintel
 See [docs/security-design.md](docs/security-design.md) for full details.
 
 - Default-deny NetworkPolicy blocks all traffic in the namespace
-- Each component has explicit egress and ingress allow rules
-- No service can reach another it has no business reaching
+- Each component has explicit egress and ingress allow rules per communication path
 - Secrets never committed — placeholder values only in Git
 - GitHub token stored in Kubernetes Secret, not in workflow engine
-- All containers run as non-root with read-only filesystem
+- All containers run as non-root with read-only filesystem and all capabilities dropped
+- seccompProfile: RuntimeDefault on every pod
+- Pod Security Admission enforced at `restricted` level on the kubeintel namespace
+- Per-component ServiceAccounts with namespace-scoped least-privilege Roles
 
 ---
 
 ## Project Status
 
 ### Level 1 — CKA Core ✅
-- [x] kubeadm cluster
+- [x] kubeadm cluster (bare-metal ARM64, containerd, Calico)
 - [x] PostgreSQL StatefulSet + PVC
-- [x] Application Deployments
-- [x] Services
+- [x] Application Deployments (summarizer-api, n8n, digest-exporter CronJob)
+- [x] Services (ClusterIP, headless)
 - [x] ConfigMaps + Secrets
-- [x] NetworkPolicies
-- [x] RBAC
-- [x] Probes + resource limits
-- [x] CronJob
+- [x] NetworkPolicies (default-deny + 11 allow rules)
+- [x] RBAC (per-component ServiceAccounts, least-privilege Roles)
+- [x] Probes (readiness, liveness, startupProbe)
+- [x] Resource requests + limits on all containers
+- [x] CronJob (digest-exporter, weekly)
+- [x] Kustomize (base + dev/prod overlays)
+- [x] ResourceQuota + LimitRange
+- [x] PodDisruptionBudget
+- [x] HPA (CPU + memory, 1–3 replicas)
 
-### Level 2 — Production Hardening
-- [ ] HPA for summarizer-api
-- [ ] metrics-server
-- [ ] Prometheus + Grafana
+### Level 2 — Production Hardening ✅
+- [x] metrics-server
+- [x] Prometheus
+- [x] Grafana (auto-provisioned datasource)
+- [x] Pod Security Admission (restricted enforcement on kubeintel namespace)
+- [x] seccompProfile: RuntimeDefault on all workloads
+- [x] readOnlyRootFilesystem on all containers
+- [x] init containers with resource limits
 
-### Level 3 — CRD Extensions
-- [ ] cert-manager
-- [ ] Argo CD
-- [ ] Prometheus Operator
+### Level 3 — CRD Extensions ✅
+- [x] Nginx Ingress Controller (NodePort, bare-metal)
+- [x] cert-manager (ClusterIssuer + Certificate, TLS for n8n)
+- [x] Argo CD Application CRD (GitOps sync from this repo)
+
+### Next
+- [ ] CI/CD pipeline (GitHub Actions: build, Trivy scan, push, kubeconform)
+- [ ] Custom Prometheus metrics (kubeintel_summarization_success_total etc.)
+- [ ] PostgreSQL backup CronJob
+- [ ] Falco runtime security
+- [ ] External Secrets Operator
