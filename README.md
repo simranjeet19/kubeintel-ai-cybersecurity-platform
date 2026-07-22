@@ -194,3 +194,23 @@ See [docs/security-design.md](docs/security-design.md) for full details.
 - [ ] PostgreSQL backup CronJob
 - [ ] Falco runtime security
 - [ ] External Secrets Operator
+
+---
+
+## Screenshots
+
+### Cluster — nodes, pods, PVCs, NetworkPolicies, PostgreSQL data
+![Cluster State](screenshots/k8s-cluster-state.png)
+
+### HPA, CronJob, RBAC
+![K8s Resources](screenshots/k8s-hpa-cronjob-rbac.png)
+
+### n8n intel pipeline — all nodes green
+![n8n Pipeline](screenshots/n8n-intel-pipeline.png)
+
+### Prometheus targets — prometheus and summarizer-api both UP
+![Prometheus Targets](screenshots/prometheus-targets.png)
+
+### Grafana Explore — /summarize 2xx confirms end-to-end AI summarization
+![Grafana Metrics](screenshots/grafana-summarize-metrics.png)
+
