@@ -14,3 +14,4 @@ resources:
   - allow-summarizer-to-postgres.yaml
   - allow-digest-exporter-egress.yaml
   - allow-digest-exporter-to-postgres.yaml
+  - allow-prometheus-to-summarizer.yaml
