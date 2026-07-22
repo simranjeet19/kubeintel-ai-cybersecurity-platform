@@ -30,8 +30,8 @@ spec:
               type: RuntimeDefault
           containers:
             - name: digest-exporter
-              image: ghcr.io/simranjeet19/kubeintel-digest-exporter:1.0.0
-              imagePullPolicy: IfNotPresent
+              image: ghcr.io/simranjeet19/kubeintel-digest-exporter:latest
+              imagePullPolicy: Always
               envFrom:
                 - configMapRef:
                     name: digest-exporter-config
