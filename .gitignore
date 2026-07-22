@@ -41,5 +41,4 @@ dist/
 
 # Tool artifacts — never commit
 .playwright-mcp/
-*.png
 CLAUDE.md
