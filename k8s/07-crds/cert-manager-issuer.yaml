@@ -1,0 +1,63 @@
+# cert-manager ClusterIssuer and Certificate for KubeIntel
+#
+# Prerequisites:
+#   kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.2/cert-manager.yaml
+#   kubectl wait --namespace cert-manager --for=condition=ready pod --selector=app.kubernetes.io/instance=cert-manager --timeout=120s
+#
+# Then apply this file:
+#   kubectl apply -f k8s/07-crds/cert-manager-issuer.yaml
+
+---
+# Self-signed CA issuer — suitable for lab/dev environments
+# For production, replace with Let's Encrypt ACME issuer
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned-issuer
+spec:
+  selfSigned: {}
+---
+# CA certificate — root cert for the kubeintel platform
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kubeintel-ca
+  namespace: cert-manager
+spec:
+  isCA: true
+  commonName: kubeintel-ca
+  secretName: kubeintel-ca-secret
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+---
+# CA-backed issuer — signs certificates for kubeintel services
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: kubeintel-ca-issuer
+spec:
+  ca:
+    secretName: kubeintel-ca-secret
+---
+# TLS certificate for n8n
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: n8n-tls
+  namespace: kubeintel
+spec:
+  secretName: n8n-tls-secret
+  commonName: n8n.kubeintel.local
+  dnsNames:
+    - n8n.kubeintel.local
+  issuerRef:
+    name: kubeintel-ca-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+  duration: 8760h    # 1 year
+  renewBefore: 720h  # renew 30 days before expiry
