@@ -1,0 +1,10 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: summarizer-api-pdb
+  namespace: kubeintel
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: summarizer-api

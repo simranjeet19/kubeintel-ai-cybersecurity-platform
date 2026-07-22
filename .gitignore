@@ -38,3 +38,8 @@ dist/
 .terraform/
 *.tfstate
 *.tfstate.backup
+
+# Tool artifacts — never commit
+.playwright-mcp/
+*.png
+CLAUDE.md

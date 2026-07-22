@@ -8,9 +8,8 @@ spec:
   selector:
     matchLabels:
       app: n8n
-  # recreate strategy — n8n uses a PVC which can only be mounted by one pod at a time
   strategy:
-    type: Recreate
+    type: Recreate  # PVC can only be mounted by one pod at a time
   template:
     metadata:
       labels:
@@ -22,8 +21,9 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       initContainers:
-        # wait for postgres to be ready before starting n8n
         - name: wait-for-postgres
           image: postgres:16-alpine
           command:
@@ -31,7 +31,6 @@ spec:
             - -c
             - |
               until pg_isready -h postgres-headless.kubeintel.svc.cluster.local -p 5432 -U kubeintel_user; do
-                echo "waiting for postgres..."
                 sleep 3
               done
           securityContext:
@@ -39,6 +38,13 @@ spec:
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
       containers:
         - name: n8n
           image: n8nio/n8n:1.68.0
@@ -66,17 +72,21 @@ spec:
             limits:
               cpu: 500m
               memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: 5678
+            failureThreshold: 30
+            periodSeconds: 5
           readinessProbe:
             httpGet:
               path: /healthz
               port: 5678
-            initialDelaySeconds: 30
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /healthz
               port: 5678
-            initialDelaySeconds: 60
             periodSeconds: 20
           securityContext:
             allowPrivilegeEscalation: false

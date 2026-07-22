@@ -18,6 +18,8 @@ spec:
         runAsNonRoot: true
         runAsUser: 472
         fsGroup: 472
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: grafana
           image: grafana/grafana:11.2.0
@@ -53,6 +55,7 @@ spec:
             periodSeconds: 15
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
           volumeMounts:
@@ -60,11 +63,15 @@ spec:
               mountPath: /etc/grafana/provisioning/datasources
             - name: data
               mountPath: /var/lib/grafana
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: provisioning
           configMap:
             name: grafana-provisioning
         - name: data
+          emptyDir: {}
+        - name: tmp
           emptyDir: {}
 ---
 apiVersion: v1
@@ -72,6 +79,8 @@ kind: Service
 metadata:
   name: grafana-svc
   namespace: kubeintel
+  labels:
+    app: grafana
 spec:
   type: ClusterIP
   selector:

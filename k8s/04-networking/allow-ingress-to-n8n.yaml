@@ -10,6 +10,18 @@ spec:
   policyTypes:
     - Ingress
   ingress:
+    # allow from ingress-nginx controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 5678
+    # allow direct access from UTM host network (port-forward, debugging)
     - from:
         - ipBlock:
             cidr: 192.168.64.0/24

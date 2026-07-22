@@ -1,15 +1,15 @@
-# ── Stage 1: builder ──────────────────────────────────────────────────────────
+# builder stage
 FROM python:3.12-alpine AS builder
 
 WORKDIR /build
 
 COPY requirements.txt .
 
-RUN apk add --no-cache gcc musl-dev libpq-dev \
+RUN apk add --no-cache gcc musl-dev libffi-dev \
  && pip install --no-cache-dir --prefix=/install -r requirements.txt
 
 
-# ── Stage 2: runtime ──────────────────────────────────────────────────────────
+# runtime stage
 FROM python:3.12-alpine AS runtime
 
 RUN apk add --no-cache libpq \

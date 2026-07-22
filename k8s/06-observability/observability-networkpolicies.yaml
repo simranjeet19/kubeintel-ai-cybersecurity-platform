@@ -11,12 +11,26 @@ spec:
     - Egress
   egress:
     - to:
-        - podSelector: {}
+        - podSelector:
+            matchLabels:
+              app: summarizer-api
       ports:
         - protocol: TCP
           port: 8000
+    - to:
+        - podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
         - protocol: TCP
           port: 9090
+    # kubernetes SD requires access to the API server
+    - to:
+        - ipBlock:
+            cidr: 192.168.64.3/32
+      ports:
+        - protocol: TCP
+          port: 6443
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: summarizer-svc
   namespace: kubeintel
+  labels:
+    app: summarizer-api
 spec:
   type: ClusterIP
   selector:

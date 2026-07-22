@@ -21,10 +21,12 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: summarizer-api
-          image: ghcr.io/simranjeet19/kubeintel-summarizer-api:latest
-          imagePullPolicy: Always
+          image: ghcr.io/simranjeet19/kubeintel-summarizer-api:1.0.0
+          imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
